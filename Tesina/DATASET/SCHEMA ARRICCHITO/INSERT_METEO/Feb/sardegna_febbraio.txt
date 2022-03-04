@@ -1,0 +1,6 @@
+INSERT INTO METEO(codice_regione,data,temperatura_media,umidita) VALUES (20,'24-Feb-2020',14,80);
+INSERT INTO METEO(codice_regione,data,temperatura_media,umidita) VALUES (20,'25-Feb-2020',13,73);
+INSERT INTO METEO(codice_regione,data,temperatura_media,umidita) VALUES (20,'26-Feb-2020',13,68);
+INSERT INTO METEO(codice_regione,data,temperatura_media,umidita) VALUES (20,'27-Feb-2020',13,63);
+INSERT INTO METEO(codice_regione,data,temperatura_media,umidita) VALUES (20,'28-Feb-2020',14,58);
+INSERT INTO METEO(codice_regione,data,temperatura_media,umidita) VALUES (20,'29-Feb-2020',11,84);

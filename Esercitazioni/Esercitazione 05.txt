@@ -1,0 +1,33 @@
+create view aeroporti_italiani as select * from aeroporti where nazione='ITALIA'
+
+select * from aeroporti_italiani
+
+create materialized view aeroporti_stranieri as select * from aeroporti where nazione <> 'ITALIA'
+
+select * from aeroporti_stranieri
+
+
+create view aeroporti_italiani as select Codice, nome, citta, nazione, numero_terminal,altitudine from aeroporti where nazione='ITALIA'
+select * from aeroporti_italiani
+insert into aeroporti_italiani values('aaa','bbb','ccc','ITALIA',0,0)
+select * from aeroporti
+
+
+--selezionare l'aeroporto (nome, nazione) che ha il numero maggiore di voli in arrivo
+--selezionare l'aeroporto (nome, nazione) che ha il numero maggiore di voli in partenza
+create materialized view statistiche_aeroporti as
+select a.nome, a.nazione, count(vp.codice) as voli_in_partenza, count(va.codice) as voli_in_arrivo
+from (aeroporti a left join voli vp on vp.aeroporto_partenza=a.codice) left join voli va on va.aeroporto_arrivo=a.codice
+group by a.nome, a.nazione
+
+select s1.nome, s1.nazione
+from statistiche_aeroporti s1
+where s1.voli_in_arrivo=(
+select max(s.voli_in_arrivo)
+from statistiche_aeroporti s)
+
+select s1.nome, s1.nazione
+from statistiche_aeroporti s1
+where s1.voli_in_partenza=(
+select max(s.voli_in_partenza)
+from statistiche_aeroporti s)

@@ -1,0 +1,44 @@
+select codice,count(*)
+from prenotazioni
+group by codice
+having count(*)>1
+
+--selezionare per ogni aeroporto(nome,nazione) il numero di voli in partenza
+select a.nome, a.nazione,count(v.codice) as numero_voli_inpartenza
+from voli v right join aeroporti a on a.codice=v.aeroporto_partenza
+group by a.nome, a.nazione
+
+--trovare per ogni utente (cognome, nome)il numero di prenotazioni per voli verso destinazioni non italiane
+select u.cognome, u.nome , count(v.codice) as numero_di_prenotazioni_pervoli
+from ((utenti u join prenotazioni p on p.utente=u.id) join voli v on p.volo=v.codice) join aeroporti a on v.aeroporto_arrivo=a.codice
+where a.nazione <> 'ITALIA'
+group by u.cognome, u.nome
+order by u.cognome, u.nome
+
+--selezionare per ogni aeroporto (nome, nazione) il numero di voli in partenza ed il numero di voli in arrivo
+select a.nome, a.nazione, count(vp.codice),count(va.codice)
+from (aeroporti a left join voli vp on a.codice=vp.aeroporto_partenza) left join voli va on a.codice=va.aeroporto_arrivo
+group by a.nome, a.nazione
+
+--selezionare per ogni nazione l'altitudine media dei relativi aeroporti
+select a.nazione, avg(a.altitudine)
+from aeroporti a
+group by a.nazione
+
+--trovare tutti i voli (codice) che non partono da aeroporti italiani (adoperare un operatore insiemistico)
+select v.codice
+from voli v join aeroporti a on v.aeroporto_partenza=a.codice
+minus
+select v1.codice
+from voli v1 join aeroporti a1 on v1.aeroporto_partenza=a1.codice
+where a1.nazione='ITALIA'
+
+
+--trovare il nome dell'aeroporto con la relativa nazione da cui partono il maggior numero di voli
+select a1.nome,a1.nazione, count(*) as numero_voli_partenza
+from voli v1 join aeroporti a1 on v1.aeroporto_partenza=a1.codice
+group by a1.nome, a1.nazione
+having count(*)>=all(
+select max(count(*))
+from voli v1 join aeroporti a1 on v1.aeroporto_partenza=a1.codice
+group by a1.nome)

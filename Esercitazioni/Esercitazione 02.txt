@@ -1,0 +1,36 @@
+select * from AEROPORTI where Nazione='ITALIA' AND altitudine >50;
+
+select * from AEROPORTI where numero_terminal < altitudine;
+
+select * from AEROPORTI where citta like '_O%A';
+
+select Nome,Cognome from UTENTI;
+
+select Nome as NOME_UTENTE,Cognome as COGNOME_UTENTE from UTENTI;
+
+select distinct codice from PRENOTAZIONI;
+
+select codice,volo, prezzo/numero_passeggeri as prezzo_per_persona from prenotazioni;
+
+select cognome, nome from UTENTI order by cognome desc;
+
+--AEREOPORTI (nome, città) ITALIANI CHE HANNO ALTITUDINE MAGGIORE DI 10
+select nome, citta from aeroporti where nazione='ITALIA' AND altitudine>10 order by citta;
+
+--UTENTI (nome, cognome) che hanno una password lunga più di 4 caratteri e ordinati per cognome
+select nome as NOME_UTENTE, cognome as COGNOME_UTENTE from UTENTI where length(password)>4 order by cognome;
+
+--selezionare il codice utente degli utenti che ancora non hanno effettuato il check-in e viaggiano in economy class
+select distinct utente from prenotazioni where classe='ECONOMY' and checkin='NO';
+
+select * from prenotazioni,utenti where utente=id;
+select * from prenotazioni join utenti on utente=id;
+
+--selezionare il nome e il cognome degli utenti che hanno prenotato il volo LH456 e viaggiano in economy
+select u.cognome, u.nome from utenti u, prenotazioni p where u.id=p.utente and p.volo='LH456' and p.classe='ECONOMY';
+select u.cognome,u.nome from utenti u join prenotazioni p on p.utente=u.id where p.volo='LH456' and p.classe='ECONOMY';
+
+--selezionare il nome e il cognome degli utenti che hanno prenotato un volo che parte da capodichino (nap) TRIPLO JOIN
+select u.cognome, u.nome from (utenti u join prenotazioni p on p.utente=u.id) join voli v on p.volo=v.codice where v.aeroporto_partenza='NAP';
+--oppure
+select u.cognome, u.nome from utenti u, prenotazioni p, voli v where p.utente=u.id and p.volo=v.codice and v.aeroporto_partenza='NAP';

@@ -1,0 +1,8 @@
+-- quando si aggiorna un codice volo, viene aggiornato allo stesso valore anche il campo volo di prenotazioni
+create or replace trigger agg_volo
+after update on voli
+for each row
+begin
+update prenotazioni set volo=:new.codice
+where volo=:old.codice;
+end;

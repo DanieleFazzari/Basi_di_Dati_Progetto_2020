@@ -1,0 +1,65 @@
+create table conti_corrente(codice char(5),saldo number, intestatario varchar2(100));
+insert into conti_corrente values('OA893',150000,'MOSCATO');
+insert into conti_corrente values('OA892',500000,'PICARIELLO');
+insert into conti_corrente values('OA894',30000,'TRAMONTANA');
+
+create table log_error(Coderrore varchar(8), codconto char(5), tipoop varchar(50), msg varchar(100),data date);
+
+create or replace procedure controllobonifico as
+begin
+declare
+importo_bonifico constant number(7):=100000;
+codice_bonifico constant char(5):='OA893';
+SALDO_attuale conti_corrente.saldo%type;
+saldo_insufficiente exception;
+begin
+select saldo into saldo_attuale from conti_corrente where codice=codice_bonifico;
+if saldo_attuale>importo_bonifico then
+update conti_corrente set saldo=saldo-importo_bonifico where codice=codice_bonifico;
+commit;
+else
+raise saldo_insufficiente;
+end if;
+exception
+when saldo_insufficiente then
+insert into log_error(coderrore, codconto,tipoop,msg,data) values('err02',Codice_bonifico, 'Bonifico','Saldo non sufficiente',SYSDATE);
+COMMIT;
+DBMS_OUTPUT.PUT_LINE('saldo non sufficiente');
+end;
+end controllobonifico;
+exec controllobonifico
+
+select saldo from conti_corrente where codice='OA893';
+-------- 
+CREATE OR REPLACE PROCEDURE AGGIORNA_PRENOTAZIONI AS
+BEGIN
+    DECLARE
+        CodiceP PRENOTAZIONI.Codice%TYPE,
+        UtenteP PRENOTAZIONI.Utente%TYPE, 
+        VoloP PRENOTAZIONI.Volo%TYPE, 
+        DataP PRENOTAZIONI.Data%TYPE, 
+        ClasseP PRENOTAZIONI.Classe%TYPE, 
+        PrezzoP PRENOTAZIONI.Prezzp%TYPE, 
+        Numero_PasseggeriP PRENOTAZIONI.Numero_Passageri%TYPE, 
+        PostoP PRENOTAZIONI.Posto%TYPE, 
+        CheckinP PRENOTAZIONI.Checkin%TYPE, 
+        Lista_ServiziP PRENOTAZIONI.Lista_Servizi%TYPE, 
+        CURSOR Pr IS 
+        SELECT Codice, Utente, Volo, Data, Classe, Prezzo, Numero_Passeggeri, Posto, Checkin, Lista_Servizi
+        FROM PRENOTAZIONI WHERE Data < SYSDATE;
+    BEGIN
+        OPEN Pr;
+        LOOP
+            FETCH Pr INTO CodiceP, UtenteP, VoloP, DataP, ClasseP, PrezzoP, Numero_PasseggeriP, PostoP, CheckinP, Lista_ServiziP;
+            EXIT WHEN Pr%NOTFOUND;
+            INSERT INTO PRENOTAZIONI_STORICO 
+            VALUES (CodiceP, UtenteP, VoloP, DataP, ClasseP, PrezzoP, Numero_PasseggeriP, PostoP, CheckinP, Lista_ServiziP);
+            DELETE FROM PRENOTAZIONI WHERE Codice=CodiceP and Volo=VoloP;
+        END LOOP;
+        CLOSE Pr;
+        COMMIT;
+    END;
+END AGGIORNA_PRENOTAZIONI;
+
+
+

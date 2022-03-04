@@ -1,0 +1,23 @@
+create table dipartimento(
+Codice char(3),
+Nome varchar2(200) not null,
+Acronimo varchar2(5) unique,
+CONSTRAINT PK_DIPARTIMENTI PRIMARY KEY(Codice)
+);
+insert into dipartimento values('001','informatica','abc');
+insert into dipartimento values('002','medicina','med');
+
+
+create table personale(
+Matricola char(5),
+Nome varchar2(100) not null,
+Cognome varchar2(100) not null,
+Ruolo varchar2(3) check(Ruolo='PO' or Ruolo='PA' or Ruolo='RU' or Ruolo='PTA'),
+Dipartimenti char(3),
+Stipendio number,
+CONSTRAINT PK_PERSONALE primary key(Matricola),
+CONSTRAINT FK_PERSONALE_DIPARTIMENTI FOREIGN KEY(Dipartimenti) REFERENCES DIPARTIMENTo(Codice)
+);
+insert into personale values ('12346','GINO','TRAMONTANA','PTA','001',1800);
+insert into personale values ('12345','VINNI','MOSCATO','RU','002',2800);
+select * from dipartimento;

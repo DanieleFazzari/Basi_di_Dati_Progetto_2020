@@ -1,0 +1,61 @@
+
+
+select u.cognome, u.nome,p.codice,p.volo,p.data
+from prenotazioni p right join utenti u on u.id=p.utente
+
+create table impiegati(
+matricola char(3) primary key,
+nominativo varchar2(200),
+stipendio number,
+capo char(3),
+constraint FK_IMP foreign key (capo) references impiegati(matricola)
+)
+-- una chiave esterna può riferirsi ad un chiava primaria che sta nella stessa tabella
+
+insert into impiegati values('AAA','angelo chianese',3500, null);  
+--il capo di un capo non esiste
+insert into impiegati values('BBB', 'vincenzo moscato',2800,'AAA');
+insert into impiegati values('PPP', 'antonio picariello',4000,'AAA');
+insert into impiegati values('MMM','nicola mazzocca',3000,null);
+insert into impiegati values('CCC','alessandro de bendectis', 1500,'MMM');
+
+
+-- trovare i nominativi degli impiegati che guadagnano più del corrispetivo capo
+select i1.nominativo
+from impiegati i1 join impiegati i2 on i1.capo=i2.matricola
+where i1.stipendio>i2.stipendio
+-- faccio un self join, cioè alle informazioni dell'impiegato unisco le informazioni del capo (che è anch'esso un impiegato)
+
+
+-- trovare per ogni volo i nomi degli aeroporti di partenza e di arrivo, devo prendere per forza aeroporti 2 volte
+--forma esplicita
+select v.codice,ap.nome,aa.nome
+from (voli v join aeroporti ap on v.aeroporto_partenza=ap.codice) join aeroporti aa on v.aeroporto_arrivo=aa.codice
+--forma implicita 
+select v.codice, ap.nome, aa.nome
+from voli v, aeroporti ap, aeroporti aa
+where v.aeroporto_partenza=ap.codice and v.aeroporto_arrivo=aa.codice
+
+select max(stipendio) as stipendio_massimo, min(stipendio) as stipendio_minimo, avg(stipendio) as media, sum(stipendio) as somma
+from impiegati
+--conta il numero di record che sono il risultato di una query
+select count(*) as numero
+from prenotazioni
+
+select count(distinct codice) as numero_prenotazioni
+from prenotazioni
+
+select utente,volo
+from prenotazioni
+group by utente,volo
+
+
+select utente, count(distinct codice) as numero_prenotazioni
+from prenotazioni
+group by utente
+having count(distinct codice) >1 -- non mi dà nulla perchè ogni utente ha un solo codice distinto
+
+--trovare per ogni volo (codice) il numero di passeggeri
+select volo, count(*) as numero_passeggeri
+from prenotazioni
+group by volo

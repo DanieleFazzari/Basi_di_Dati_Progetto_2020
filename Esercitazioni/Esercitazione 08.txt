@@ -1,0 +1,79 @@
+select denominazione_regione, sum(totale_casi) as numero_contagiati
+from covid
+where denominazione_regione ='Lombardia'
+group by denominazione_regione
+
+create or replace procedure conta_contagiati_per_regione
+(Regione in covid.denominazione_regione%TYPE,
+Giorno in covid.data%TYPE
+)
+as
+begin
+declare
+numero_contagiati covid.totale_casi%TYPE;
+cont integer;
+regione_errata exception;
+begin
+select count(*) into cont from covid where denominazione_regione=Regione;
+if (cont =0) then raise regione_errata;
+else
+select sum(totale_casi) into numero_contagiati
+from covid
+where denominazione_regione =Regione and data=Giorno
+group by denominazione_regione;
+dbms_output.put_line('Numero contagiati al giorno ' || Giorno || ': ' || numero_contagiati);
+end if;
+exception
+when regione_errata then
+dbms_output.put_line('Regione errata');
+end;
+end conta_contagiati_per_regione;
+
+exec conta_contagiati_per_regione('Campania','25-Feb-2020')
+exec conta_contagiati_per_regione('Caampania','25-Feb-2020')
+
+procedura che conta i contagiati per provincia data una regione, deve stampare i contagiati per provincia ma con gli stessi input di prima
+la query non ritorna un unico valore, devo usare il cursore e nel loop del cursore fare la stampa a video
+
+
+create or replace procedure conta_contagiati_per_provincia
+(Regione in covid.denominazione_regione%TYPE,
+Giorno in covid.data%TYPE
+)
+as
+begin
+declare
+provincia covid.denominazione_provincia%TYPE;
+numero_contagiati covid.totale_casi%TYPE;
+cont integer;
+regione_errata exception;
+cursor imp is select denominazione_provincia, sum(totale_casi) from covid where denominazione_regione=Regione and data=Giorno and denominazione_provincia <> 'In fase di definizione/aggiornamento' group by denominazione_provincia;
+begin
+select count(*) into cont from covid where denominazione_regione=Regione;
+if (cont =0) then raise regione_errata;
+else
+open imp;
+loop
+fetch imp into provincia, numero_contagiati;
+exit when imp%notfound;
+dbms_output.put_line('Numero contagiati al giorno ' || Giorno || ', nella provincia '|| provincia ||' : ' || numero_contagiati);
+end loop;
+close imp;
+end if;
+exception
+when regione_errata then
+dbms_output.put_line('Regione errata');
+end;
+end conta_contagiati_per_provincia;
+
+exec conta_contagiati_per_provincia('Campania','25-Feb-2020')
+
+
+create table provincia(cod number(3), nome varchar2(200));
+
+create or replace trigger prova
+after insert on covid
+for each row
+begin
+insert into provincia(cod, nome) values(:new.codice_provincia,:new.denominazione_provincia);
+end;
